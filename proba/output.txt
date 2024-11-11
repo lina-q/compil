@@ -1,0 +1,18 @@
+BEGIN
+
+TYPE_INT | int  |  88
+ID | main  |  46
+LPAREN | (  |  13
+RPAREN | )  |  14
+LBRACE | {  |  96
+ID | a  |  70
+ASSIGN | =  |  34
+INT_NUM | 4  |  25
+SEMICOLON | ;  |  32
+RETURN | return  |  65
+INT_NUM | 0  |  21
+RBRACE | }  |  98
+
+END
+
+
