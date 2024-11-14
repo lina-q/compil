@@ -6,9 +6,12 @@ LPAREN | (  |  13
 RPAREN | )  |  14
 LBRACE | {  |  96
 ID | a  |  70
-ASSIGN | =  |  34
-INT_NUM | 4  |  25
 SEMICOLON | ;  |  32
+ID | b  |  71
+ASSIGN | =  |  34
+ITOF | itof  |  79
+FLOAT_NUM | 3.0  |  2
+INT_NUM | 3  |  24
 RETURN | return  |  65
 INT_NUM | 0  |  21
 RBRACE | }  |  98
@@ -16,3 +19,21 @@ RBRACE | }  |  98
 END
 
 
+Function
+  int
+  main
+  Descr
+    int
+    VarList
+      a
+  Descr
+    int
+    VarList
+      b
+  Descr
+    a
+    SimpleExpr
+      itof
+  Descr
+    b
+  0

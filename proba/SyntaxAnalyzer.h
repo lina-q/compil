@@ -84,65 +84,88 @@ private:
         }
     }
 
+    bool identifierExists(const std::string& identifier)
+    {
+        for (const auto& tokenPair : tokens)
+        {
+            const Token& token = tokenPair.first;
 
+
+            if (token.type == TokenType::ID && token.value == identifier)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     //парсим функцию
-    std::shared_ptr<ParseTreeNode> parseFunction()
-    {
+    std::shared_ptr<ParseTreeNode> parseFunction() {
         auto node = std::make_shared<ParseTreeNode>("Function");
 
-        
-
-   
-        
-        if (currentToken().type != TokenType::TYPE_INT && currentToken().type != TokenType::TYPE_FLOAT)
-        {
-            throw std::runtime_error("Ожидался тип (int или float) "  );
+        // Проверка типа функции
+        if (currentToken().type != TokenType::TYPE_INT && currentToken().type != TokenType::TYPE_FLOAT) {
+            throw std::runtime_error("Ожидался тип (int или float) ");
         }
         node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
         nextToken(); // TYPE
 
-
-       
-        if (currentToken().type != TokenType::ID ) 
-        {
-            throw std::runtime_error("Ожидалось имя функции "  );
+        // Проверка имени функции
+        if (currentToken().type != TokenType::ID) {
+            throw std::runtime_error("Ожидалось имя функции ");
         }
         node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
         nextToken(); // FunctionName
 
-
-        
-        if (currentToken().type != TokenType::LPAREN && previousToken.type == TokenType::ID)
-        {
-            throw std::runtime_error("Ожидалась '(' "  );
+        // Проверка на '('
+        if (currentToken().type != TokenType::LPAREN) {
+            throw std::runtime_error("Ожидалась '(' ");
         }
         nextToken(); // '('
 
-
-
-        if (currentToken().type != TokenType::RPAREN)
-        {
-            throw std::runtime_error("Ожидалась ')' "  );
+        // Проверка на ')'
+        if (currentToken().type != TokenType::RPAREN) {
+            throw std::runtime_error("Ожидалась ')' ");
         }
         nextToken(); // ')'
-  
-        if (currentToken().type != TokenType::LBRACE && previousToken.type == TokenType::RPAREN) 
-        {
-            throw std::runtime_error("Ожидалась '{' "  );
+
+        // Проверка на '{'
+        if (currentToken().type != TokenType::LBRACE) {
+            throw std::runtime_error("Ожидалась '{' ");
         }
         nextToken(); // '{'
 
-
-        //парсим Descriptions
-        while (currentToken().type != TokenType::RBRACE) 
-        {
-            node->children.push_back(parseDescriptions());
+        // Парсим описания
+        while (currentToken().type != TokenType::RBRACE) {
+            if (currentToken().type == TokenType::TYPE_INT || currentToken().type == TokenType::TYPE_FLOAT) {
+                node->children.push_back(parseDescr());
+            }
+            else if (currentToken().type == TokenType::ID) {
+                // Обрабатываем присваивание
+                node->children.push_back(parseDescr());
+            }
+            else if (currentToken().type == TokenType::RETURN) {
+                // Обработка оператора return
+                nextToken(); // Переход к следующему токену после return
+                if (currentToken().type == TokenType::INT_NUM || currentToken().type == TokenType::FLOAT_NUM || currentToken().type == TokenType::ID) {
+                    node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
+                    nextToken(); // Переход к значению
+                }
+                // Проверка на точку с запятой
+                if (currentToken().type != TokenType::SEMICOLON) {
+                    throw std::runtime_error("Ожидалась ';' после return ");
+                }
+                nextToken(); // ';'
+            }
+            else {
+                throw std::runtime_error("Ожидалось объявление переменной, присваивание или return ");
+            }
         }
 
-        if (currentToken().type != TokenType::RBRACE )
+        // Проверка на '}'
+        if (currentToken().type != TokenType::RBRACE) 
         {
-            throw std::runtime_error("Ожидалась '}' "  );
+            throw std::runtime_error("Ожидалась '}' ");
         }
         nextToken(); // '}'
 
@@ -164,110 +187,118 @@ private:
     // Парсим Descr
     std::shared_ptr<ParseTreeNode> parseDescr()
     {
-
-        
-
-        if (currentToken().type == TokenType::RETURN)
-        {
-            findReturn = true;
-           
-        }
         auto node = std::make_shared<ParseTreeNode>("Descr");
-        
-       
-        if (currentToken().type != TokenType::TYPE_INT && currentToken().type != TokenType::TYPE_FLOAT &&
-            currentToken().type != TokenType::RETURN)
-        {
+        if (currentToken().type == TokenType::RETURN)   findReturn = true;
 
-            
-            
-            if(findReturn) throw std::runtime_error("Ожидался '}' " );
-            
-             else throw std::runtime_error("Ожидался тип (int или float) " );
+        // Проверка на тип переменной
+        if (currentToken().type == TokenType::TYPE_INT || currentToken().type == TokenType::TYPE_FLOAT) {
+            // Это объявление переменной
+            node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
+            nextToken(); // TYPE
+
+            // Парсим список переменных
+            node->children.push_back(parseVarList());
+
+            // Проверка на наличие точки с запятой
+            if (currentToken().type != TokenType::SEMICOLON)
+            {
+                
+                throw std::runtime_error("Ожидалась ';' ");
+            }
+            nextToken(); // ';'
         }
-        node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
-        nextToken(); // TYPE
+        else if (currentToken().type == TokenType::ID) {
+            // Это присваивание
+            node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
+            nextToken(); // ID
 
-        // Парсим список переменных
-        node->children.push_back(parseVarList());
-
-        // Проверяем на наличие оператора присваивания
-        if (currentToken().type == TokenType::ASSIGN) 
-        {
-            
-
-            nextToken(); // Переход к '='
-
-
-            if (currentToken().type == TokenType::ITOF)
+            // Проверка на наличие оператора присваивания
+            if (currentToken().type == TokenType::ASSIGN )
             {
-
-                node->children.push_back(parseSimpleExpr());
-
-            }
-
-            else if (currentToken().type == TokenType::FTOI)
-            {
-  
-                node->children.push_back(parseSimpleExpr());
-
-            }
-            else if (currentToken().type == TokenType::INT_NUM || currentToken().type == TokenType::FLOAT_NUM)
-            {
-               
-                nextToken();
-            }
-            else
-            {
+        
                 
-                throw std::runtime_error("Ожидалась значение или выражение после '=' ");
-            }
+                nextToken(); // Переход к '='
+                //std::cout << currentToken().value << '\n';
 
-            if (currentToken().type == TokenType::PLUS || currentToken().type == TokenType::MINUS)
-            {
-                int tk = 0;
-                if (currentToken().type == TokenType::PLUS) tk = 1;
-                else tk = 2;
-                nextToken();
-                
                 if (currentToken().type == TokenType::ITOF)
                 {
 
-                    
                     node->children.push_back(parseSimpleExpr());
 
                 }
 
                 else if (currentToken().type == TokenType::FTOI)
                 {
+
                     node->children.push_back(parseSimpleExpr());
 
                 }
                 else if (currentToken().type == TokenType::INT_NUM || currentToken().type == TokenType::FLOAT_NUM)
                 {
-
+           
                     nextToken();
                 }
                 else
                 {
-                    if(tk == 1) throw std::runtime_error("Ожидалась значение или выражение после '+' "  );
-                    else throw std::runtime_error("Ожидалась значение или выражение после '-'  "  );
+            
+                    throw std::runtime_error("Ожидалась значение или выражение после '=' ");
                 }
 
-                
-            }
+                if (currentToken().type == TokenType::PLUS || currentToken().type == TokenType::MINUS)
+                {
+                    int tk = 0;
+                    if (currentToken().type == TokenType::PLUS) tk = 1;
+                    else tk = 2;
+                    nextToken();
             
-            
-            
-        }
-       
+                    if (currentToken().type == TokenType::ITOF)
+                    {
 
-        // Проверка на наличие точки с запятой
-        if (currentToken().type != TokenType::SEMICOLON) 
-        {
-            throw std::runtime_error("Ожидалась ';'   "  );
+                
+                        node->children.push_back(parseSimpleExpr());
+
+                    }
+
+                    else if (currentToken().type == TokenType::FTOI)
+                    {
+                        node->children.push_back(parseSimpleExpr());
+
+                    }
+                    else if (currentToken().type == TokenType::INT_NUM || currentToken().type == TokenType::FLOAT_NUM)
+                    {
+
+                        nextToken();
+                    }
+                    else
+                    {
+                        if(tk == 1) throw std::runtime_error("Ожидалась значение  "  );
+                        else throw std::runtime_error("Ожидалась значение  "  );
+                    }
+
+            
+                }
+        
+        
+        
+            }
+            else 
+            {
+                throw std::runtime_error("Ожидался оператор '=' ");
+            }
+
+            // Проверка на наличие точки с запятой
+            if (currentToken().type != TokenType::SEMICOLON) 
+            {
+                
+                throw std::runtime_error("Ожидалась ';' ");
+            }
+            nextToken(); // ';'
         }
-        nextToken(); // ';'
+        else 
+        {
+            
+            throw std::runtime_error("Ожидалось объявление переменной или присваивание ");
+        }
 
         return node;
     }
@@ -345,8 +376,11 @@ private:
     std::shared_ptr<ParseTreeNode> parseVarList() 
     {
         auto node = std::make_shared<ParseTreeNode>("VarList");
+        if (currentToken().type == TokenType::ID && previousToken.type != TokenType::TYPE_INT && previousToken.type != TokenType::TYPE_FLOAT) std::cout << "MMMM" << '\n';
+       
         if (currentToken().type != TokenType::ID && previousToken.type != TokenType::RETURN) 
         {
+            //std::cout << currentToken().value << '\n';
             throw std::runtime_error("Ожидалось имя переменной "  );
         }
         node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
@@ -357,6 +391,7 @@ private:
             nextToken(); // ','
             if (currentToken().type != TokenType::ID) 
             {
+                
                 throw std::runtime_error("Ожидалось имя переменной "   );
             }
             node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
