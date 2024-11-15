@@ -11,7 +11,11 @@ ID | b  |  71
 ASSIGN | =  |  34
 ITOF | itof  |  79
 FLOAT_NUM | 3.0  |  2
+PLUS | +  |  16
+FTOI | ftoi  |  71
+INT_NUM | 4  |  25
 INT_NUM | 3  |  24
+INT_NUM | 2  |  23
 RETURN | return  |  65
 INT_NUM | 0  |  21
 RBRACE | }  |  98
@@ -20,20 +24,41 @@ END
 
 
 Function
-  int
-  main
-  Descr
+  Begin
     int
-    VarList
-      a
-  Descr
-    int
-    VarList
-      b
-  Descr
-    a
-    SimpleExpr
-      itof
-  Descr
-    b
-  0
+    main
+    Descriptions
+      VarList
+        Id
+          a
+    Descriptions
+      VarList
+        Id
+          b
+    Operators
+      Op
+        Id
+          a
+        SimpleExpr
+          itof
+          Const
+            3.0
+        +
+        SimpleExpr
+          ftoi
+          Const
+            4
+    Operators
+      Op
+        Id
+          b
+        SimpleExpr
+          Const
+            3
+        +
+        SimpleExpr
+          Const
+            2
+  End
+    return
+    0

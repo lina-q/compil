@@ -1,8 +1,9 @@
-int main(){ 
-     int a ;
+int main()
+{
+     int a;
 	 int b;
-	 a = itof(3.0);
-	 b = 3;
+	 a = itof(3.0) + ftoi(4);
+	 b = 3 + 2;
 	
 	
 	return 0; }
