@@ -1,10 +1,8 @@
 int main()
 {
-     int a;
-	 int b;
-	 a = itof(3.0) + ftoi(4);
-	 b = 3 + 2;
-	
+	int b;
+	int c;
+	a = 3 + 2;
 	
 	return 0; }
 
