@@ -263,12 +263,12 @@ private:
 
         while (currentToken().type == TokenType::PLUS || currentToken().type == TokenType::MINUS) {
             auto opNode = std::make_shared<ParseTreeNode>(currentToken().value);
-            nextToken(); // consume '+' or '-'
+            nextToken(); //  '+' или '-'
             auto nextSimpleExprNode = parseSimpleExpr();
             
             opNode->children.push_back(nextSimpleExprNode);
             node->children.push_back(opNode);
-            simpleExprNode = nextSimpleExprNode; // update for chaining
+            simpleExprNode = nextSimpleExprNode; 
         }
 
         return node;
@@ -312,8 +312,8 @@ private:
             }
             nextToken(); //  '('
             
-            if (currentToken().type != TokenType::FLOAT_NUM && currentToken().type != TokenType::ID)
-                throw std::runtime_error("ќжидалось вещественное число или переменна€ ");
+            if (currentToken().type != TokenType::INT_NUM && currentToken().type != TokenType::ID)
+                throw std::runtime_error("ќжидалось целое число или переменна€ ");
             node->children.push_back(parseExpr());
             if (currentToken().type != TokenType::RPAREN) 
             {
@@ -330,8 +330,8 @@ private:
                 throw std::runtime_error("ќжидалась '(' ");
             }
             nextToken(); //  '('
-            if (currentToken().type != TokenType::INT_NUM && currentToken().type != TokenType::ID)
-                throw std::runtime_error("ќжидалось целое число или переменна€");
+            if (currentToken().type != TokenType::FLOAT_NUM && currentToken().type != TokenType::ID)
+                throw std::runtime_error("ќжидалось вещественное число или переменна€");
             node->children.push_back(parseExpr());
             if (currentToken().type != TokenType::RPAREN) 
             {

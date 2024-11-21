@@ -4,7 +4,7 @@ int main()
 	int b;
 	
 	a = 4 - (2 + b);
-	b = itof(5.0) + ftoi(3);
+	b = itof(5) + ftoi(3.0);
 	
 	return 0;
 	
