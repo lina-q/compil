@@ -5,14 +5,18 @@ ID | main  |  46
 LPAREN | (  |  13
 RPAREN | )  |  14
 LBRACE | {  |  96
-ID | b  |  71
-SEMICOLON | ;  |  32
-ID | c  |  72
 ID | a  |  70
+SEMICOLON | ;  |  32
+ID | b  |  71
 ASSIGN | =  |  34
-INT_NUM | 3  |  24
-PLUS | +  |  16
+INT_NUM | 4  |  25
+MINUS | -  |  18
 INT_NUM | 2  |  23
+PLUS | +  |  16
+ITOF | itof  |  79
+FLOAT_NUM | 5.0  |  80
+FTOI | ftoi  |  71
+INT_NUM | 3  |  24
 RETURN | return  |  65
 INT_NUM | 0  |  21
 RBRACE | }  |  98
@@ -20,3 +24,53 @@ RBRACE | }  |  98
 END
 
 
+Function
+  Begin
+    main
+  Descriptions
+    VarList
+      Id
+        a
+  Descriptions
+    VarList
+      Id
+        b
+  Operators
+    Op
+      Id
+        a
+      Expr
+        SimpleExpr
+          Const
+            4
+        -
+          SimpleExpr
+            Expr
+              SimpleExpr
+                Const
+                  2
+              +
+                SimpleExpr
+                  Id
+                    b
+  Operators
+    Op
+      Id
+        b
+      Expr
+        SimpleExpr
+          itof
+          Expr
+            SimpleExpr
+              Const
+                5.0
+        +
+          SimpleExpr
+            ftoi
+            Expr
+              SimpleExpr
+                Const
+                  3
+  End
+    return
+    0
