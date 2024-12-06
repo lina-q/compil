@@ -4,6 +4,7 @@
 #include "LexicalAnalyzer.h"
 #include "HashTable.h"
 #include "SyntaxAnalyzer.h"
+#include "SemanticAnalyzer.h"
 #include <fstream>
 
 int main()
@@ -14,16 +15,19 @@ int main()
 
     HashTable hashTable;
     LexicalAnalyzer lexicalAnalyzer(filename, hashTable);
-
     lexicalAnalyzer.tokenize(); 
 
     hashTable.print(); 
 
   
     SyntaxAnalyzer syntaxAnalyzer(lexicalAnalyzer, outputFilename);
-
-   
     syntaxAnalyzer.parse(); 
+
+    
+    
+
+    SemanticAnalyzer semanticAnalyzer(syntaxAnalyzer);
+    semanticAnalyzer.analyze();
 
     return 0;
 }

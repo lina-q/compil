@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="LexicalAnalyzer.h" />
+    <ClInclude Include="SemanticAnalyzer.h" />
     <ClInclude Include="SyntaxAnalyzer.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>

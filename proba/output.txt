@@ -7,16 +7,13 @@ RPAREN | )  |  14
 LBRACE | {  |  96
 ID | a  |  70
 SEMICOLON | ;  |  32
+TYPE_FLOAT | float  |  63
 ID | b  |  71
 ASSIGN | =  |  34
 INT_NUM | 4  |  25
-MINUS | -  |  18
-INT_NUM | 2  |  23
 PLUS | +  |  16
-ITOF | itof  |  79
-FLOAT_NUM | 5.0  |  80
-FTOI | ftoi  |  71
 INT_NUM | 3  |  24
+ITOF | itof  |  79
 RETURN | return  |  65
 INT_NUM | 0  |  21
 RBRACE | }  |  98
@@ -43,16 +40,10 @@ Function
         SimpleExpr
           Const
             4
-        -
-          SimpleExpr
-            Expr
-              SimpleExpr
-                Const
-                  2
-              +
-                SimpleExpr
-                  Id
-                    b
+        +
+        SimpleExpr
+          Const
+            3
   Operators
     Op
       Id
@@ -62,15 +53,8 @@ Function
           itof
           Expr
             SimpleExpr
-              Const
-                5.0
-        +
-          SimpleExpr
-            ftoi
-            Expr
-              SimpleExpr
-                Const
-                  3
+              Id
+                a
   End
     return
     0

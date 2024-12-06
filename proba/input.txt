@@ -1,10 +1,13 @@
 int main()
 {
 	int a;
-	int b;
+	float b;
 	
-	a = 4 - (2 + b);
-	b = itof(5) + ftoi(3.0);
+	
+	a = 4+3;
+	b = itof(a);
+	
+	
 	
 	return 0;
 	
