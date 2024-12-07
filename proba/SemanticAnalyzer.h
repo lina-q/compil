@@ -42,14 +42,14 @@ private:
     std::unordered_map<std::string, std::string> variableTypes; 
     std::string returnType; 
     std::unordered_map<std::string, TokenType>  description;
-    std::vector<std::pair<std::string, TokenType>>  operators;
+    std::unordered_map<std::string, TokenType>& operators;
 
     std::vector<std::string> op;
     
     bool endDes = true;
 
     void analyzeNode(std::shared_ptr<ParseTreeNode>& root, std::vector<std::string>& tree,
-        std::unordered_map<std::string, TokenType>& description, std::vector<std::pair<std::string, TokenType>>& operators) {
+        std::unordered_map<std::string, TokenType>& description, std::unordered_map<std::string, TokenType>& operators) {
 
 
         for (int i = 0; i < tree.size(); ++i)
@@ -63,7 +63,11 @@ private:
             }
         }
 
+        
+
         //for (int i = 0; i < operators.size(); ++i) std::cout << operators[i].first << '\n';
+
+
 
 
         for (int i = 0; i < op.size(); ++i)
@@ -76,40 +80,90 @@ private:
                 throw std::runtime_error("Переменная " + sim + id + sim + " не была объявлена");
             }
 
-            TokenType current = description[op[i]];
+            
             std::vector<TokenType> digits;
 
-            for (int j = 0; j < operators.size(); ++j)
+            for (int j = 0; j < tree.size(); ++j)
             {
-                if (operators[j].first == id)
+                if (tree[j] == "End") break;
+                TokenType current = description[op[i]];
+                if (tree[j] == "Operators")
                 {
                     ++j;
-                    while (j < operators.size() && operators[j].second != TokenType::ID)
+                    ++j;
+                    while (tree[j] != "Operators")
                     {
-                        if (current == TokenType::TYPE_INT)
+                        if(current == TokenType::TYPE_INT)
                         {
-                            if (operators[j].second != TokenType::INT_NUM && operators[j].second != TokenType::FTOI)
+                            
+                            if (operators[tree[j]] != TokenType::INT_NUM && operators[tree[j]] != TokenType::FTOI && operators[tree[j]] != TokenType::ID)
                             {
-                                throw std::runtime_error("Тип данных не соответствует типу переменной 'int'");
+                                std::string znak = "\'";
+                                throw std::runtime_error("Тип данных " + znak + tree[j] + znak + " не соответствует типу переменной 'int'");
                             }
-                            if (operators[j].second == TokenType::FTOI) ++j;
-                        }
-                        else if (current == TokenType::TYPE_FLOAT)
-                        {
-                            // Изменяем оператор || на && для правильной проверки
-                            if (operators[j].second != TokenType::FLOAT_NUM && operators[j].second != TokenType::ITOF)
+                            if (operators[tree[j]] == TokenType::FTOI)
                             {
-                                throw std::runtime_error("Тип данных не соответствует типу переменной 'float'");
+                                ++j;
+                                ++j;
                             }
-                            if (operators[j].second == TokenType::ITOF)
+                            if (operators[tree[j]] == TokenType::ID)
+                            {
+                                if (description[tree[j]] != current)
+                                {
+                                    std::string znak = "\'";
+                                    throw std::runtime_error("Тип данных " + znak + tree[j] + znak + " не соответствует типу переменной 'int'");
+                                }
+                                else ++j;
+                            }
+                            if (operators[tree[j]] == TokenType::INT_NUM)
                             {
                                 ++j;
                             }
+                            if (tree[j] == "End") break;
                         }
-                        ++j;
+                        else
+                        {
+                           
+                            if (operators[tree[j]] != TokenType::FLOAT_NUM && operators[tree[j]] != TokenType::ITOF && operators[tree[j]] != TokenType::ID)
+                            {
+                                std::string znak = "\'";
+                                throw std::runtime_error("Тип данных " + znak + tree[j] + znak + " не соответствует типу переменной 'float'");
+                            }
+                            if (operators[tree[j]] == TokenType::ITOF)
+                            {
+                                ++j;
+                                ++j;
+                            }
+                            if (operators[tree[j]] == TokenType::ID)
+                            {
+                                if (description[tree[j]] != current)
+                                {
+                                    std::string znak = "\'";
+                                    throw std::runtime_error("Тип данных " + znak + tree[j] + znak + " не соответствует типу переменной 'float'");
+                                }
+                                else ++j;
+                            }
+                            if (operators[tree[j]] == TokenType::FLOAT_NUM)
+                            {
+                                ++j;
+                            }
+                            if (tree[j] == "End") break;
+                            
+                        }
+                        
                     }
+                    --j;
+                    ++i;
+
+                        
+
                 }
+               
+               
             }
+
+            
+            
 
         }
 

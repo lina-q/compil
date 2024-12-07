@@ -3,15 +3,12 @@ int main()
 	int a;
 	float b;
 	
+	a = 2;
+	b = 5.0;
+
+	return a;
 	
-	a = 4+3;
-	b = itof(a);
-	
-	
-	
-	return 0;
-	
-	}
+}
 
 
 

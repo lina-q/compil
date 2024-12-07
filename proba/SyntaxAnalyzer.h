@@ -26,21 +26,21 @@ public:
     std::shared_ptr<ParseTreeNode> root;
     std::vector<std::string > tree;
     std::unordered_map<std::string, TokenType> descriptions;
-    std::vector<std::pair<std::string, TokenType>> operators;
+    std:: unordered_map<std::string, TokenType> operators;
     SyntaxAnalyzer(LexicalAnalyzer& lexer, const std::string& outputFilename)
-        : lexer(lexer), outputFilename(outputFilename), currentTokenIndex(0) 
+        : lexer(lexer), outputFilename(outputFilename), currentTokenIndex(0)
     {
         tokens = lexer.getTokens();
         previousToken = { TokenType::UNKNOWN, "" }; 
     }
 
-    void parse() 
+    void parse(bool& parse) 
     {
         try 
         {
             root = parseFunction();
             
-            outputParseTree(root, 0); 
+            outputParseTree(root, 0, parse); 
         }
         catch (const std::runtime_error& e) 
         {
@@ -66,7 +66,7 @@ public:
     {
         return descriptions;
     }
-    std::vector<std::pair<std::string, TokenType>>  getOp()
+    std::unordered_map<std::string, TokenType>& getOp()
     {
         return operators;
     }
@@ -75,25 +75,19 @@ private:
     LexicalAnalyzer& lexer;
     std::string outputFilename;
     std::vector<std::pair<Token, int>> tokens; 
-    size_t currentTokenIndex;  
+    size_t currentTokenIndex;
+
+    std::vector<TokenType> startEnd;
+    
     
     Token previousToken; 
     bool findReturn = false;
-
-
-    
-   
-    
 
 
     bool lBrace = false;
     bool rBrace = false;
 
 
-    
-
-
-    
    
     Token currentToken() 
     {
@@ -138,6 +132,8 @@ private:
             throw std::runtime_error("ќжидалс€ тип (int или float) ");
         }
        
+       
+        startEnd.push_back(currentToken().type);
         nextToken(); // TYPE
         
        
@@ -187,11 +183,20 @@ private:
             {
                 findReturn = true;
 
+                
+
                 tree.push_back("End");
                 nodeEnd->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
                 tree.push_back(currentToken().value);
 
                 nextToken(); 
+
+                startEnd.push_back(descriptions[currentToken().value]);
+
+                if (startEnd[0] != startEnd[1]) throw std::runtime_error("“ип возвращаемого значени€ не соответсвует типу функции");
+
+                
+               
                 if (currentToken().type == TokenType::INT_NUM || currentToken().type == TokenType::FLOAT_NUM
                     || currentToken().type == TokenType::ID)
                 {
@@ -245,6 +250,10 @@ private:
         return node;
     }
 
+    std::vector<std::string> prisvoenie;
+    TokenType currentTokenOperator;
+    std::string currentValue;
+
     bool ob = false;
     //парсим Descr
     std::shared_ptr<ParseTreeNode> parseDescr() {
@@ -253,8 +262,21 @@ private:
         if (!ob && (currentToken().type == TokenType::TYPE_INT || currentToken().type == TokenType::TYPE_FLOAT)) {
             node = std::make_shared<ParseTreeNode>("Descriptions");
             nextToken();
+
+            
+
+            auto it = descriptions.find(currentToken().value);
+
+            if (it != descriptions.end())
+            {
+                std::string sim = "\'";
+                throw std::runtime_error("ѕеременна€ " + sim + currentToken().value + sim + " уже была объ€влена");
+            }
+           
            
             descriptions[currentToken().value] = previousToken.type;
+
+            
                
 
            //std::cout << previousToken.value << '\n';
@@ -272,18 +294,13 @@ private:
             auto nodeId = std::make_shared<ParseTreeNode>("Id");
             auto nodeOp = std::make_shared<ParseTreeNode>("Op");
 
+            currentTokenOperator = descriptions[currentToken().value];
+            currentValue = currentToken().value;
 
+            prisvoenie.push_back(currentToken().value);
 
-            operators.push_back(make_pair(currentToken().value, currentToken().type));
+            operators[currentToken().value] =  currentToken().type;
 
-            /*auto it = std::find(call.begin(), call.end(), currentToken().value);
-            std::string znak = "\'";
-            if (it == call.end())
-            {
-                throw std::runtime_error("ѕеременна€ " + znak + currentToken().value + znak + " не была объ€влена ");
-            }*/
-
-           
 
             nodeId->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             tree.push_back(currentToken().value);
@@ -339,6 +356,8 @@ private:
         return node;
     }
 
+    bool itof_ftoi = false;
+
     std::shared_ptr<ParseTreeNode> parseSimpleExpr()
     {
         auto node = std::make_shared<ParseTreeNode>("SimpleExpr");
@@ -347,6 +366,25 @@ private:
 
         if (currentToken().type == TokenType::ID) 
         {
+            
+
+            auto it = std::find(prisvoenie.begin(), prisvoenie.end(), currentToken().value);
+            std::string znak = "\'";
+            if (it == prisvoenie.end())
+            {
+                throw std::runtime_error("ѕеременна€ " + znak + currentToken().value + znak + " не была определена ");
+            }
+            else if(currentValue == currentToken().value) throw std::runtime_error("ѕеременна€ не может быть присвоена сама себе ");
+            else
+            {
+                if (currentTokenOperator != descriptions[currentToken().value] && !itof_ftoi)
+                {
+                    if(currentTokenOperator == TokenType::TYPE_INT) throw std::runtime_error("“ип данных не соответствует типу переменной 'int'");
+                    else throw std::runtime_error("“ип данных не соответствует типу переменной 'float'");
+                }
+            }
+            itof_ftoi = false;
+
             nodeId->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             tree.push_back(currentToken().value);
             node->children.push_back(nodeId);
@@ -355,7 +393,7 @@ private:
         else if (currentToken().type == TokenType::INT_NUM || currentToken().type == TokenType::FLOAT_NUM)
         {
             //std::cout << currentToken().value << '\n';
-            operators.push_back(make_pair(currentToken().value, currentToken().type));
+            operators[currentToken().value] = currentToken().type;
 
             nodeConst->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             tree.push_back(currentToken().value);
@@ -374,8 +412,13 @@ private:
         }
         else if (currentToken().type == TokenType::ITOF)
         {
+            itof_ftoi = true;
+
+
+
+
             node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
-            operators.push_back(make_pair(currentToken().value, currentToken().type));
+            operators[currentToken().value] = currentToken().type;
             tree.push_back(currentToken().value);
             nextToken(); //  'itof'
             if (currentToken().type != TokenType::LPAREN) 
@@ -383,20 +426,44 @@ private:
                 throw std::runtime_error("ќжидалась '(' ");
             }
             nextToken(); //  '('
+
+            
             
             if (currentToken().type != TokenType::INT_NUM && currentToken().type != TokenType::ID)
                 throw std::runtime_error("ќжидалось целое значение ");
+
+            
+
+            if (currentToken().type == TokenType::ID)
+            {
+                auto it = std::find(prisvoenie.begin(), prisvoenie.end(), currentToken().value);
+                std::string znak = "\'";
+                if (it == prisvoenie.end())
+                {
+                    throw std::runtime_error("ѕеременна€ " + znak + currentToken().value + znak + " не была определена ");
+                }
+
+                if (descriptions[currentToken().value] != TokenType::TYPE_INT)
+                {
+                    throw std::runtime_error("ќжидалась переменна€ с типом 'int' ");
+                }
+            }
+
+           
+
             node->children.push_back(parseExpr());
             if (currentToken().type != TokenType::RPAREN) 
             {
                 throw std::runtime_error("ќжидалась ')' ");
             }
+            
             nextToken(); //  ')'
         }
         else if (currentToken().type == TokenType::FTOI) 
         {
+            itof_ftoi = true;
             node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
-            operators.push_back(make_pair(currentToken().value, currentToken().type));
+            operators[currentToken().value] = currentToken().type;
             tree.push_back(currentToken().value);
             nextToken(); //  'ftoi'
             if (currentToken().type != TokenType::LPAREN) 
@@ -406,6 +473,26 @@ private:
             nextToken(); //  '('
             if (currentToken().type != TokenType::FLOAT_NUM && currentToken().type != TokenType::ID)
                 throw std::runtime_error("ќжидалось вещественное значение");
+
+           
+
+            if (currentToken().type == TokenType::ID)
+            {
+                auto it = std::find(prisvoenie.begin(), prisvoenie.end(), currentToken().value);
+                std::string znak = "\'";
+                if (it == prisvoenie.end())
+                {
+                    throw std::runtime_error("ѕеременна€ " + znak + currentToken().value + znak + " не была определена ");
+                }
+                if (descriptions[currentToken().value] != TokenType::TYPE_FLOAT)
+                {
+                    throw std::runtime_error("ќжидалась переменна€ с типом 'float' ");
+                }
+            }
+
+
+
+
             node->children.push_back(parseExpr());
             if (currentToken().type != TokenType::RPAREN) 
             {
@@ -459,8 +546,11 @@ private:
     }
 
     //вывод дерева разбора в файл
-    void outputParseTree(const std::shared_ptr<ParseTreeNode>& node, int depth) 
+    void outputParseTree(const std::shared_ptr<ParseTreeNode>& node, int depth, bool& parse) 
     {
+        parse = true;
+       
+
         std::ofstream outFile(outputFilename, std::ios::app);
         if (!outFile.is_open())
         {
@@ -470,7 +560,7 @@ private:
         outFile << std::string(depth * 2, ' ') << node->value << std::endl; // ќтступы
         for (const auto& child : node->children) 
         {
-            outputParseTree(child, depth + 1); // –екурсивный вывод
+            outputParseTree(child, depth + 1, parse); // –екурсивный вывод
         }
         outFile.close();
 

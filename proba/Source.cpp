@@ -19,15 +19,20 @@ int main()
 
     hashTable.print(); 
 
+    bool parse = false;
+
   
     SyntaxAnalyzer syntaxAnalyzer(lexicalAnalyzer, outputFilename);
-    syntaxAnalyzer.parse(); 
+     syntaxAnalyzer.parse(parse);
 
+     
     
     
-
-    SemanticAnalyzer semanticAnalyzer(syntaxAnalyzer);
-    semanticAnalyzer.analyze();
+    if(parse)
+    {
+        SemanticAnalyzer semanticAnalyzer(syntaxAnalyzer);
+        semanticAnalyzer.analyze();
+    }
 
     return 0;
 }
