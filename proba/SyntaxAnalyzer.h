@@ -25,6 +25,7 @@ class SyntaxAnalyzer
 public:
     std::shared_ptr<ParseTreeNode> root;
     std::vector<std::string > tree;
+    
     std::unordered_map<std::string, TokenType> descriptions;
     std:: unordered_map<std::string, TokenType> operators;
     SyntaxAnalyzer(LexicalAnalyzer& lexer, const std::string& outputFilename)
@@ -61,6 +62,11 @@ public:
     {
         return tree;
     }
+    std::vector<TokenType> getStartEnd()
+    {
+        return startEnd;
+    }
+    
 
     std::unordered_map<std::string, TokenType>  getDescr()
     {
@@ -143,8 +149,10 @@ private:
         }
         
         tree.push_back("Begin");
+        
         nodeStart->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
         tree.push_back(currentToken().value);
+       
         node->children.push_back(nodeStart);
         nextToken(); // FunctionName
 
@@ -186,7 +194,9 @@ private:
                 
 
                 tree.push_back("End");
+                
                 nodeEnd->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
+               
                 tree.push_back(currentToken().value);
 
                 nextToken(); 
@@ -202,6 +212,7 @@ private:
                 {
                     nodeEnd->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
                     tree.push_back(currentToken().value);
+                    
                     nextToken(); 
                 }
 
@@ -261,6 +272,7 @@ private:
 
         if (!ob && (currentToken().type == TokenType::TYPE_INT || currentToken().type == TokenType::TYPE_FLOAT)) {
             node = std::make_shared<ParseTreeNode>("Descriptions");
+           
             nextToken();
 
             
@@ -291,6 +303,7 @@ private:
             ob = true;
             node = std::make_shared<ParseTreeNode>("Operators");
             tree.push_back("Operators");
+            
             auto nodeId = std::make_shared<ParseTreeNode>("Id");
             auto nodeOp = std::make_shared<ParseTreeNode>("Op");
 
@@ -387,6 +400,7 @@ private:
 
             nodeId->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             tree.push_back(currentToken().value);
+            
             node->children.push_back(nodeId);
             nextToken();
         }
@@ -397,6 +411,7 @@ private:
 
             nodeConst->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             tree.push_back(currentToken().value);
+           
             node->children.push_back(nodeConst);
             nextToken();
         }
@@ -420,6 +435,7 @@ private:
             node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             operators[currentToken().value] = currentToken().type;
             tree.push_back(currentToken().value);
+            
             nextToken(); //  'itof'
             if (currentToken().type != TokenType::LPAREN) 
             {
@@ -465,6 +481,7 @@ private:
             node->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             operators[currentToken().value] = currentToken().type;
             tree.push_back(currentToken().value);
+            
             nextToken(); //  'ftoi'
             if (currentToken().type != TokenType::LPAREN) 
             {
@@ -523,10 +540,12 @@ private:
         }
         nodeId->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
         tree.push_back(currentToken().value);
+        
         nextToken(); // ID
 
         while (currentToken().type == TokenType::COMMA) 
         {
+            if(currentToken().type == TokenType::COMMA) throw std::runtime_error("переменные не могут быть объявлены через запятую ");
             nextToken(); // ','
             if (currentToken().type != TokenType::ID) 
             {
@@ -535,6 +554,7 @@ private:
             }
             nodeId->children.push_back(std::make_shared<ParseTreeNode>(currentToken().value));
             tree.push_back(currentToken().value);
+            
             nextToken(); // ID
         }
 
@@ -565,13 +585,7 @@ private:
         outFile.close();
 
 
-        //for (const auto& child : node->children) {
-        //    if (child) { // Проверка на nullptr
-        //        std::cout << child->value << std::endl; // Вывод значения узла
-        //    }
-        //}
         
-       
         
     }
 };

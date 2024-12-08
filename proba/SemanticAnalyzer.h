@@ -14,10 +14,12 @@
 class SemanticAnalyzer
 {
 public:
-    SemanticAnalyzer(SyntaxAnalyzer& syntaxAnalyzer)
+    SemanticAnalyzer(SyntaxAnalyzer& syntaxAnalyzer, const std::string& outputFilename)
         : root(syntaxAnalyzer.getParseTree()),
         tree(syntaxAnalyzer.getTree()), 
-        description(syntaxAnalyzer.getDescr()), 
+        startEnd(syntaxAnalyzer.getStartEnd()),
+        description(syntaxAnalyzer.getDescr()),
+        outputFilename(outputFilename),
         operators(syntaxAnalyzer.getOp())
         
     {}
@@ -27,6 +29,11 @@ public:
         try 
         {
             analyzeNode(root, tree, description, operators);
+
+            outputPostForm(root, 0);
+            
+
+            outPut(startEnd);
         }
         catch (const std::runtime_error& e)
         {
@@ -43,6 +50,8 @@ private:
     std::string returnType; 
     std::unordered_map<std::string, TokenType>  description;
     std::unordered_map<std::string, TokenType>& operators;
+    std::vector<TokenType> startEnd;
+    std::string outputFilename;
 
     std::vector<std::string> op;
     
@@ -54,7 +63,7 @@ private:
 
         for (int i = 0; i < tree.size(); ++i)
         {
-            //std::cout << tree[i] << '\n';
+            //outFile << tree[i] << '\n';
             if (tree[i] == "Operators")
             {
                 endDes = false;
@@ -65,7 +74,7 @@ private:
 
         
 
-        //for (int i = 0; i < operators.size(); ++i) std::cout << operators[i].first << '\n';
+        //for (int i = 0; i < operators.size(); ++i) outFile << operators[i].first << '\n';
 
 
 
@@ -172,7 +181,112 @@ private:
         
     }
 
+    std::vector<std::string> postfix;
+
+    void outputPostForm(const std::shared_ptr<ParseTreeNode>& node, int depth)
+    {
+
+        //outFile << std::string(depth * 2, ' ') << node->value << std::endl; // Отступы
+        for (const auto& child : node->children)
+        {
+            if (child->value == "Descriptions") postfix.push_back(child->value);
+            if (child->value == "Op") postfix.push_back(child->value);
+            //if (child->value == "Operators") postfix.push_back("=");
+            outputPostForm(child, depth + 1); // Рекурсивный вывод
+        }
+
+        for (const auto& child : node->children) {
+            //if (child) { // Проверка на nullptr
+            //    outFile << child->value << std::endl; // Вывод значения узла
+            //}
+            if (child->value != "Id" && child->value != "VarList" && child->value != "Const" && child->value != "SimpleExpr" && child->value != "Expr"
+                && child->value != "Operators" && child->value != "Descriptions" &&
+                child->value != "Begin" && child->value != "End" && child->value != "Op")
+            {
+                postfix.push_back(child->value);
+            }
+        }
+
+        
+
+    }
+
+    bool descr = false;
+    bool first = false;
+    bool ret = false;
+   
+
+    void outPut(std::vector<TokenType> startEnd)
+    {
+
+        std::ofstream outFile(outputFilename, std::ios::app);
+
+        outFile << '\n';
+        outFile << '\n';
+        outFile << '\n';
+
+        int i =0 ;
+        for (int i = 0; i < postfix.size(); ++i)
+        {
+            if (postfix[i] == "main")
+            {
+                if (startEnd[0] == TokenType::TYPE_INT)
+                    outFile << "int " << postfix[i] << " DECLFUNC";
+                else outFile << "float " << postfix[i] << " DECLFUNC";
+                ++i;
+            }
+            if (postfix[i] == "Descriptions")
+            {
+                descr = true;
+                outFile << '\n';
+                ++i;
+                if (description[postfix[i]] == TokenType::TYPE_INT) outFile << "int ";
+                if (description[postfix[i]] == TokenType::TYPE_FLOAT) outFile << "float ";
+                
+
+            }
+            if (postfix[i] == "Op")
+            {
+                
+                ++i;
+                if(first) outFile << " =";
+                outFile << '\n';
+                first = true;
+                
+
+            }
+
+            if (postfix[i] == "return")
+            {
+                outFile << " =";
+
+                outFile << '\n';
+                outFile << postfix[i+1] << " " << postfix[i];
+
+                ++i;
+                ret = true;
+                
+            }
+
+            if (descr)
+            {
+                outFile << postfix[i] << " DECL";
+                descr = false;
+            }
+            else if (ret) break;
+            
+            else outFile << postfix[i] << " ";
+
+            
+        }
+
+        outFile << '\n';
+
+        outFile.close();
+    }
+
+    
+
     
 };
 
-//throw std::runtime_error("Переменная " + sim + operators[i] + sim + " не была объявлена");

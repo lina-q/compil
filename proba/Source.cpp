@@ -30,7 +30,7 @@ int main()
     
     if(parse)
     {
-        SemanticAnalyzer semanticAnalyzer(syntaxAnalyzer);
+        SemanticAnalyzer semanticAnalyzer(syntaxAnalyzer, outputFilename);
         semanticAnalyzer.analyze();
     }
 

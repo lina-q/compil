@@ -85,10 +85,15 @@ private:
         bool hasDigit = false; // наличие цифры
 
         while (position < input.size() &&
-           (isalnum(input[position]) || input[position] == '_')) // только латинские буквы и цифры
+           (isalnum(input[position]) || input[position] == '_' )) // только латинские буквы и цифры
     {
+
         if (isdigit(input[position])) {
             hasDigit = true;
+        }
+        if (input[position] == ',') {
+            // Если встречаем запятую, выбрасываем ошибку
+            throw std::runtime_error("Error: Identifier cannot contain a comma.");
         }
         ++position;
     }

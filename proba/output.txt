@@ -9,8 +9,13 @@ ID | a  |  70
 SEMICOLON | ;  |  32
 TYPE_FLOAT | float  |  63
 ID | b  |  71
+ID | c  |  72
 ASSIGN | =  |  34
 INT_NUM | 2  |  23
+PLUS | +  |  16
+INT_NUM | 4  |  25
+MINUS | -  |  18
+INT_NUM | 5  |  26
 FLOAT_NUM | 5.0  |  80
 RETURN | return  |  65
 RBRACE | }  |  98
@@ -29,6 +34,10 @@ Function
     VarList
       Id
         b
+  Descriptions
+    VarList
+      Id
+        c
   Operators
     Op
       Id
@@ -37,6 +46,16 @@ Function
         SimpleExpr
           Const
             2
+        +
+        SimpleExpr
+          Expr
+            SimpleExpr
+              Const
+                4
+            -
+            SimpleExpr
+              Const
+                5
   Operators
     Op
       Id
@@ -45,6 +64,25 @@ Function
         SimpleExpr
           Const
             5.0
+  Operators
+    Op
+      Id
+        c
+      Expr
+        SimpleExpr
+          Const
+            2
   End
     return
     a
+
+
+
+int main DECLFUNC
+int a DECL
+float b DECL
+int c DECL
+a 2 4 5 - +  =
+b 5.0  =
+c 2  =
+a return
