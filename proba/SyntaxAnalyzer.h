@@ -266,6 +266,7 @@ private:
     std::string currentValue;
 
     bool ob = false;
+    TokenType currentTokenDescr;
     //парсим Descr
     std::shared_ptr<ParseTreeNode> parseDescr() {
         auto node = std::make_shared<ParseTreeNode>("");
@@ -287,6 +288,7 @@ private:
            
            
             descriptions[currentToken().value] = previousToken.type;
+            currentTokenDescr = previousToken.type;
 
             
                
@@ -545,8 +547,13 @@ private:
 
         while (currentToken().type == TokenType::COMMA) 
         {
-            if(currentToken().type == TokenType::COMMA) throw std::runtime_error("переменные не могут быть объ€влены через зап€тую ");
+            
             nextToken(); // ','
+
+            
+
+            descriptions[currentToken().value] = currentTokenDescr;
+
             if (currentToken().type != TokenType::ID) 
             {
                 

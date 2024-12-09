@@ -91,10 +91,7 @@ private:
         if (isdigit(input[position])) {
             hasDigit = true;
         }
-        if (input[position] == ',') {
-            // Если встречаем запятую, выбрасываем ошибку
-            throw std::runtime_error("Error: Identifier cannot contain a comma.");
-        }
+        
         ++position;
     }
 

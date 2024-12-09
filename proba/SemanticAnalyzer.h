@@ -63,7 +63,7 @@ private:
 
         for (int i = 0; i < tree.size(); ++i)
         {
-            //outFile << tree[i] << '\n';
+            //std::cout << tree[i] << '\n';
             if (tree[i] == "Operators")
             {
                 endDes = false;
@@ -176,7 +176,7 @@ private:
 
         }
 
-        //проверка на тип данных
+        
 
         
     }
@@ -214,6 +214,10 @@ private:
     bool descr = false;
     bool first = false;
     bool ret = false;
+    bool first2 = false;
+
+
+    int countPeremennix = 0;
    
 
     void outPut(std::vector<TokenType> startEnd)
@@ -237,16 +241,30 @@ private:
             }
             if (postfix[i] == "Descriptions")
             {
+                if(first2) outFile << countPeremennix << " DECL";
+                first2 = true;
+                
                 descr = true;
                 outFile << '\n';
                 ++i;
                 if (description[postfix[i]] == TokenType::TYPE_INT) outFile << "int ";
                 if (description[postfix[i]] == TokenType::TYPE_FLOAT) outFile << "float ";
+
+                countPeremennix = 0;
                 
 
             }
+            if (descr)
+            {
+
+                ++countPeremennix;
+                
+
+            }
+            
             if (postfix[i] == "Op")
             {
+                if (first2) outFile << countPeremennix - 1 << " DECL"; first2 = false;
                 
                 ++i;
                 if(first) outFile << " =";
@@ -267,15 +285,16 @@ private:
                 ret = true;
                 
             }
+           
 
-            if (descr)
-            {
-                outFile << postfix[i] << " DECL";
-                descr = false;
-            }
-            else if (ret) break;
             
-            else outFile << postfix[i] << " ";
+            if (ret) break;
+            
+            else
+            {
+                outFile << postfix[i] << " ";
+            }
+
 
             
         }

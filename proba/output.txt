@@ -6,6 +6,9 @@ LPAREN | (  |  13
 RPAREN | )  |  14
 LBRACE | {  |  96
 ID | a  |  70
+COMMA | ,  |  17
+ID | f  |  75
+ID | g  |  76
 SEMICOLON | ;  |  32
 TYPE_FLOAT | float  |  63
 ID | b  |  71
@@ -30,6 +33,8 @@ Function
     VarList
       Id
         a
+        f
+        g
   Descriptions
     VarList
       Id
@@ -38,6 +43,14 @@ Function
     VarList
       Id
         c
+  Operators
+    Op
+      Id
+        f
+      Expr
+        SimpleExpr
+          Const
+            2
   Operators
     Op
       Id
@@ -79,9 +92,10 @@ Function
 
 
 int main DECLFUNC
-int a DECL
-float b DECL
-int c DECL
+int a f g 3 DECL
+float b 1 DECL
+int c 1 DECL
+f 2  =
 a 2 4 5 - +  =
 b 5.0  =
 c 2  =
