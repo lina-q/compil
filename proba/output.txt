@@ -92,9 +92,9 @@ Function
 
 
 int main DECLFUNC
-int a f g 3 DECL
-float b 1 DECL
-int c 1 DECL
+int a f g 4 DECL
+float b 2 DECL
+int c 2 DECL
 f 2  =
 a 2 4 5 - +  =
 b 5.0  =

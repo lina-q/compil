@@ -217,7 +217,7 @@ private:
     bool first2 = false;
 
 
-    int countPeremennix = 0;
+    int countPeremennix = 1;
    
 
     void outPut(std::vector<TokenType> startEnd)
@@ -250,7 +250,7 @@ private:
                 if (description[postfix[i]] == TokenType::TYPE_INT) outFile << "int ";
                 if (description[postfix[i]] == TokenType::TYPE_FLOAT) outFile << "float ";
 
-                countPeremennix = 0;
+                countPeremennix = 1;
                 
 
             }
