@@ -2,13 +2,16 @@ int main()
 {
 	int a , f, g;
 	float b;
-	int c;
+	int c, b;
+	
 	
 
 	f = 2;
-	a = 2 + (4 - 5);
-	b = 5.0;
+	a = ftoi(1.0);
+	b = 5.0 ;
 	c = 2;
+
+	
 
 	return a;
 	

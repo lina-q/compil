@@ -301,10 +301,22 @@ private:
             }
             nextToken(); // ';'
         }
-        else if (currentToken().type == TokenType::ID) {
+        else if (currentToken().type == TokenType::ID)
+        {
             ob = true;
             node = std::make_shared<ParseTreeNode>("Operators");
             tree.push_back("Operators");
+
+
+            auto it = descriptions.find(currentToken().value);
+
+            if (it == descriptions.end())
+            {
+                std::string sim = "\'";
+                throw std::runtime_error("Переменная " + sim + currentToken().value + sim + " не была объявлена");
+            }
+
+
             
             auto nodeId = std::make_shared<ParseTreeNode>("Id");
             auto nodeOp = std::make_shared<ParseTreeNode>("Op");
@@ -550,7 +562,13 @@ private:
             
             nextToken(); // ','
 
-            
+            auto it = descriptions.find(currentToken().value);
+
+            if (it != descriptions.end())
+            {
+                std::string sim = "\'";
+                throw std::runtime_error("Переменная " + sim + currentToken().value + sim + " уже была объявлена");
+            }
 
             descriptions[currentToken().value] = currentTokenDescr;
 
